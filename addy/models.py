@@ -200,6 +200,18 @@ class Job_Openings(models.Model):
 	def __str__(self):
 		return self.name
 
+class JobOpeningsForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(JobOpeningsForm, self).__init__(*args, **kwargs)
+		for field in self: 
+			field.field.widget.attrs['class'] = 'form-control'
+	class Meta:
+		model = Job_Openings
+		fields = '__all__'
+
+	
+
+		
 
 class Job_Application(models.Model):
 	job_opening = models.ForeignKey(Job_Openings, on_delete = models.CASCADE)

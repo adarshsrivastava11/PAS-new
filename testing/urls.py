@@ -22,6 +22,7 @@ urlpatterns = patterns('',
   (r'^(?P<user_name>[a-zA-Z]+)/resume/$', resume_manage),
   (r'^companysignup/$', company_signup),
   (r'^(?P<username>[a-zA-Z]+)/homepage/$', homepage),
+  (r'^(?P<username>[a-zA-Z]+)/opening/$', job_opening),
 
   
  

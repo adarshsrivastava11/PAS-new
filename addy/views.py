@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.core.mail import send_mail
 import time
 from datetime import datetime 
-from django.utils import timezone
+from django.utils import timezone 
 
 
 def main_page(request):
@@ -206,17 +206,39 @@ def homepage(request,username):
     elif Student.objects.filter(user = request.user).exists():
       return redirect('/' + username + '/dashboard/')
     elif Companies.objects.filter(user = request.user).exists():
+      company = Companies.objects.filter(user = request.user)
       email_user = request.user.email
       name = Companies.objects.get(user = request.user).name
       lastlogin = request.user.last_login
+      if Job_Openings.objects.filter(company = company).exists():
+        job_list = Job_Openings.objects.filter(company = company)
       return render(request,'homepage.html',{
         'name_user':name,
         'lastlogin':lastlogin,
         'username':username,
         'email_user':email_user,
-        'user_name':username,
+        'job_list':job_list,
         })
 
+@login_required
+def job_opening(request,username):
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+    if Companies.objects.filter(user = request.user).exists():
+      if request.method == 'POST':
+        form = JobOpeningsForm(request.POST)
+        if form.is_valid():
+          form.save()
+          return redirect('/' + username + '/homepage/' )
+        else:
+          error = "Form data problem"
+      else:
+        job = Job_Openings(company = Companies.objects.get(user =  request.user))
+        form = JobOpeningsForm(instance = job)
+        return render(request,'job_opening.html',{'form':form,'username':username})
+    else:
+      return redirect('/' + username + '/dashboard/')
 @login_required
 def changepassword(request,user_name):
   username = user_name
