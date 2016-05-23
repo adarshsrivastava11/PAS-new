@@ -1,0 +1,16 @@
+<html>
+  <head>
+    <title>{{ head_title }}</title>
+  </head>
+  <body>
+
+    <h1>{{ page_title }}</h1>
+    <p>{{ page_body }}</p>
+    <form action="/{{username}}/fillform/" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" />
+</form>
+<a href="/">Go Back</a>
+  </body>
+</html>

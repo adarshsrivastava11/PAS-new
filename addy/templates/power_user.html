@@ -1,0 +1,33 @@
+<html>
+<head>
+    <title>Power User:SPO</title>
+</head>
+<body>
+    <table>
+    <tr>
+        <th>Password(Temproary)</th>
+        <th> ID </th>
+        <th>Roll Number</th>
+        <th>Response</th>
+    </tr>
+   
+
+<form action="/poweruser/" method="post">
+    {% csrf_token %}
+    {% for item in query_res %}
+    <tr> 
+        <td>{{ item.student_name }}</td>
+        <td>{{item.user_id}}</th>
+        <td>{{ item.student_roll }}</td>
+    
+     <td><button type="submit" name="choice" id="choice{{item.id}}" value="{{ item.user_id }}" >Accept</button></td>
+     </tr>
+    {% endfor %}
+</table>
+        
+    
+</form>
+<a href="/newsmanage/">News</a>
+
+</body>
+</html>

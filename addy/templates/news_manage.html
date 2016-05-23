@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>News Management:Poweruser,SPO</title>
+    <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+	 <table>
+    <tr>
+        <th>Company Name</th>
+        <th> News </th>
+        <th>Author</th>
+        <th>Delete</th>
+        
+    </tr>
+   
+
+<form action="/newsmanage/" method="post">
+    {% csrf_token %}
+    {% for item in allnews %}
+    <tr> 
+        <td>{{ item.company_name }}</td>
+        <td>{{item.news}}</th>
+        <td>{{ item.author }}</td>
+    
+     
+    <td><button type="submit" name="removeNews" id="removeNews{{item.id}}" value="{{ item.id }}" >Delete</button></td>
+     </tr>
+    {% endfor %}
+</table>
+<div class="container">
+
+    <form action="/newsmanage/" method="post">
+        <div class="form-group">
+        <label for="email">Name Of Comapny:</label>
+        <input type="text" class="form-control" id="email" name="company_name">
+        </div>
+        <div class="form-group">
+        <label for="email">News:</label>
+        <textarea class="form-control" rows="4" id="comment" name="news_data"></textarea>
+        </div>
+        <button type="submit" class="btn btn-default">Add News</button>
+        <button type="reset" class="btn btn-default">Reset</button>
+    </form>
+</div>
+</body>
