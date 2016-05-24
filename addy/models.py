@@ -75,8 +75,8 @@ class StudentForm(ModelForm):
 		model = Student
 		exclude = ['user']
 		widgets = {
-		'email_iitk': forms.TextInput(attrs = {'disabled':'yes'}),
-		'roll_number' : forms.TextInput(attrs = {'disabled' : ''}),
+		'email_iitk': forms.TextInput(attrs = {'readonly':'yes'}),
+		'roll_number' : forms.TextInput(attrs = {'readonly' : ''}),
 		}
 
 
@@ -207,7 +207,7 @@ class JobOpeningsForm(ModelForm):
 			field.field.widget.attrs['class'] = 'form-control'
 	class Meta:
 		model = Job_Openings
-		fields = '__all__'
+		exclude = ['company']
 		
 
 class Job_Application(models.Model):
@@ -223,7 +223,13 @@ class News(models.Model):
 	time_date = models.DateTimeField('Date Published')
 
 	def __str__(self):
-		return self.company_name
+		return self.job_opening.name
+
+class NewsForm(ModelForm):
+	class Meta:
+		model = News
+		exclude = ['time_date']
+
 
 class Temp_Student(models.Model):
 	user = models.OneToOneField(User,on_delete = models.CASCADE)

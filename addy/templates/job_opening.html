@@ -136,6 +136,7 @@
                             </div>
                             <div class="content">
                                 <form  class = "form-inline" action="/{{username}}/opening/" method="post">
+                                    {% csrf_token %}
                                     {% for field in form %}
                                     <div class = "row">
                                         <div class = "col-md-12">
@@ -147,7 +148,7 @@
                                         </div>                                  
                                     </div>
                                     {% endfor %}
-                                    <input type="submit" value="Change" class = "btn btn-primary"/>            
+                                    <input type="submit" value="Submit" class = "btn btn-primary"/>            
                                 </form>
                                 <div class="footer">                                
                                     <hr>
