@@ -234,7 +234,7 @@ class Temp_Student(models.Model):
 	user = models.OneToOneField(User,on_delete = models.CASCADE)
 	#Password is stored as the Student Name because Mail Port is not working
 	student_name = models.CharField(max_length=200)
-	student_roll = models.IntegerField(default=0)
+	student_roll = models.IntegerField()
 	student_username = models.CharField(max_length=200)
 	student_isAccepted = models.IntegerField(default=0)
 	def __str__(self):
