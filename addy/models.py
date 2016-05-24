@@ -208,9 +208,6 @@ class JobOpeningsForm(ModelForm):
 	class Meta:
 		model = Job_Openings
 		fields = '__all__'
-
-	
-
 		
 
 class Job_Application(models.Model):
@@ -220,11 +217,9 @@ class Job_Application(models.Model):
 
 
 class News(models.Model):
-
-	company_name = models.CharField(max_length=200)
-	news = models.CharField(max_length=800)
-	author = models.CharField(max_length=200)
-	
+	job_opening = models.ForeignKey(Job_Openings,on_delete = models.CASCADE)
+	news = models.TextField()
+	author = models.CharField(max_length=200)	
 	time_date = models.DateTimeField('Date Published')
 
 	def __str__(self):
