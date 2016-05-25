@@ -21,6 +21,7 @@ urlpatterns = patterns('',
   (r'^companysignup/$', company_signup),
   (r'^(?P<username>[a-zA-Z_]+)/homepage/$', homepage),
   (r'^(?P<username>[a-zA-Z_]+)/opening/$', job_opening),
+  (r'^(?P<username>[a-zA-Z_]+)/profile/$', student_profile),
 
   
  

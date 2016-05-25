@@ -8,11 +8,18 @@ from django.template import Context
 from django.contrib.auth.models import User
 from django.shortcuts import redirect
 from django.contrib.auth import logout
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required,user_passes_test
 from django.core.mail import send_mail
 import time
 from datetime import datetime 
 from django.utils import timezone 
+import re
+
+def student_check(user):
+  return Student.objects.filter(user = user).exists()
+
+def company_check(user):
+  return Companies.objects.filter(user = user).exists()
 
 
 def main_page(request):
@@ -22,7 +29,10 @@ def main_page(request):
 
 def login_page(request):
   error = ''
-
+  if request.user.is_authenticated():
+    if request.GET.__contains__('next'):
+      m = re.search('^/(?P<username>[a-zA-Z_]+)',request.GET.__getitem__('next'))
+      return redirect(m.group(0) + '/dashboard/')
   if request.method == 'POST':
     form = Login(request.POST)
 
@@ -93,16 +103,7 @@ def signup(request):
 def signup_success(request):
   return render(request, 'post_signup.html')
 
-# def signup_fail(request):
 
-#   template = get_template('signup_fail.html')
-#   variables = Context({
-#     'message': 'The Username Already Exists', 
-    
-    
-#   })
-#   output = template.render(variables)
-#   return HttpResponse(output)
 
 def company_signup(request):
   error = ""
@@ -119,6 +120,7 @@ def company_signup(request):
     form = CompanyApplicationForm()
 
   return render(request, 'company_signup.html', {'form': form,'error':error})
+
 
 
 @login_required(login_url = '/login/')
@@ -160,55 +162,67 @@ def dashboard(request,user_name):
       return redirect('/' + user_name + '/homepage/')
 
 @login_required(login_url = '/login/')
-def homepage(request,username):
+@user_passes_test(student_check,login_url = '/login/')
+def student_profile(request,username):
   if username != request.user.username:
     return redirect('/login/')
   else:
-    if Temp_Student.objects.filter(user = request.user).exists():
-      return redirect('/' + username + '/fillform/')
-    elif Student.objects.filter(user = request.user).exists():
-      return redirect('/' + username + '/dashboard/')
-    elif Companies.objects.filter(user = request.user).exists():
-      company = Companies.objects.get(user = request.user)
-      email_user = company.email
-      name = company.name
-      lastlogin = request.user.last_login
-      if Job_Openings.objects.filter(company = company).exists():
-        job_list = Job_Openings.objects.filter(company = company)
+    student = Student.objects.get(user = request.user)
+    if request.method == 'POST':
+      form = StudentForm(request.POST,instance = student)
+      if form.is_valid:
+        form.save()
       else:
-        job_list = Job_Openings.objects.none()
-      return render(request,'homepage.html',{
-        'name_user':name,
-        'lastlogin':lastlogin,
-        'username':username,
-        'email_user':email_user,
-        'job_list':job_list,
-        })
+        error = form.errors
+    else:
+      form = StudentForm(instance = student)
+    return render(request,'profile.html',{'form':form,'username':username})
 
 
 
 @login_required(login_url = '/login/')
+@user_passes_test(company_check,login_url = '/login/')
+def homepage(request,username):
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+    company = Companies.objects.get(user = request.user)
+    email_user = company.email
+    name = company.name
+    lastlogin = request.user.last_login
+    if Job_Openings.objects.filter(company = company).exists():
+      job_list = Job_Openings.objects.filter(company = company)
+    else:
+      job_list = Job_Openings.objects.none()
+    return render(request,'homepage.html',{
+      'name_user':name,
+      'lastlogin':lastlogin,
+      'username':username,
+      'email_user':email_user,
+      'job_list':job_list,
+      })
+
+
+
+@login_required(login_url = '/login/')
+@user_passes_test(company_check,login_url = '/login/')
 def job_opening(request,username):
   if username != request.user.username:
     return redirect('/login/')
   else:
-    if Companies.objects.filter(user = request.user).exists():
-      company = Companies.objects.get(user = request.user)
-      job = Job_Openings(company = company)
-      if request.method == 'POST':
-        
-        form = JobOpeningsForm(request.POST,instance = job)
-        if form.is_valid():
-          form.save()
-          return redirect('/' + username + '/homepage/' )
-        else:
-          error = "Form data problem"
+    company = Companies.objects.get(user = request.user)
+    job = Job_Openings(company = company)
+    if request.method == 'POST':
+      
+      form = JobOpeningsForm(request.POST,instance = job)
+      if form.is_valid():
+        form.save()
+        return redirect('/' + username + '/homepage/' )
       else:
-        form = JobOpeningsForm(instance = job)
-        return render(request,'job_opening.html',{'form':form,'username':username})
+        error = "Form data problem"
     else:
-      return redirect('/' + username + '/dashboard/')
-
+      form = JobOpeningsForm(instance = job)
+      return render(request,'job_opening.html',{'form':form,'username':username})
 
 
 @login_required(login_url = '/login/')

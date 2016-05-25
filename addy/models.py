@@ -71,10 +71,16 @@ class Student (models.Model):
 
 
 class StudentForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(StudentForm, self).__init__(*args, **kwargs)
+		for field in self: 
+			field.field.widget.attrs['class'] = 'form-control'
 	class Meta:
 		model = Student
 		exclude = ['user']
 		widgets = {
+		'program': forms.Select(attrs = {'class': 'form-control'}),
+		'department': forms.Select(attrs = {'class': 'form-control'}),
 		'email_iitk': forms.TextInput(attrs = {'readonly':'yes'}),
 		'roll_number' : forms.TextInput(attrs = {'readonly' : ''}),
 		}
