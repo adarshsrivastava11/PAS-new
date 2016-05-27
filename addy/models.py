@@ -228,7 +228,8 @@ class Job_Openings(models.Model):
 	contact_details2 = models.CharField(max_length = 1024)
 	contact_details3 = models.CharField(max_length = 1024)
 	application_deadline = models.DateField()
-	eligiblity = models.CharField(max_length = 1024)
+	eligible_departments = models.ManyToManyField(Department)
+	eligiblity = models.CharField(max_length = 1024,default = 'none')
 	name = models.CharField(max_length = 200)
 	published = models.BooleanField()
 	deadline = models.DateField()
@@ -257,6 +258,9 @@ class JobOpeningsForm(ModelForm):
 	class Meta:
 		model = Job_Openings
 		exclude = ['company']
+		widgets = {
+		'eligible_departments':forms.CheckboxSelectMultiple(),
+		}
 		
 
 class Job_Application(models.Model):
@@ -268,7 +272,7 @@ class Job_Application(models.Model):
 class News(models.Model):
 	job_opening = models.ForeignKey(Job_Openings,on_delete = models.CASCADE)
 	news = models.TextField()
-	author = models.CharField(max_length=200)	
+	subject = models.CharField(max_length=200)	
 	time_date = models.DateTimeField('Date Published')
 
 	def __str__(self):

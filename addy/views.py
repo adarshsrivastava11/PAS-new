@@ -233,6 +233,15 @@ def student_data(request,username):
     return render(request,'data.html',{'form':form,'username':username,'error':error})
 
 
+@login_required(login_url = '/login/')
+@user_passes_test(student_check,login_url = '/login/')
+def job_application(request,username):
+  if username != request.user.username:
+    redirect('/login/')
+  else:
+    student = Student.objects.get(user = request.user)
+    job_list = Job_Openings.objects.filter(eligible_departments  = student.department).order_by('-application_deadline')
+    return render(request,'job_applications.html',{'job_list':job_list,'username':username})
 
 
 
