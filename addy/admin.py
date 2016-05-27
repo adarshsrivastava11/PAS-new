@@ -10,4 +10,5 @@ admin.site.register(Temp_Student)
 admin.site.register(CompanyApplication)
 admin.site.register(Companies)
 admin.site.register(Job_Openings)
+admin.site.register(Ug_Datas)
 

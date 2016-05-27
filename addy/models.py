@@ -11,6 +11,7 @@ from django.forms import ModelForm
 # Different programs available for departments
 class Program(models.Model):
 	program_name = models.CharField(max_length = 200)
+	value = models.IntegerField(default = 1)
 	def __str__(self):
 		return self.program_name
 
@@ -96,6 +97,16 @@ class Dual_Datas(models.Model):
 	pg_cpi = models.DecimalField(max_digits = 5, decimal_places = 3)
 
 
+class DualDatasForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(DualDatasForm, self).__init__(*args, **kwargs)
+		for field in self:
+			field.field.widget.attrs['class'] = 'form-control'
+	class Meta:
+		model = Dual_Datas
+		exclude = ['student']
+
+
 
 class Pg_Datas(models.Model):
 	student = models.OneToOneField(Student)
@@ -108,6 +119,16 @@ class Pg_Datas(models.Model):
 	name_of_degree = models.CharField(max_length = 200)
 	year_of_ug = models.IntegerField()
 	specialisation = models.CharField(max_length = 200)
+
+
+class PgDatasForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(PgDatasForm, self).__init__(*args, **kwargs)
+		for field in self:
+			field.field.widget.attrs['class'] = 'form-control'
+	class Meta:
+		model = Pg_Datas
+		exclude = ['student']
 
 
 
@@ -135,6 +156,14 @@ class Phd_Datas(models.Model):
 	ug_specialisation = models.CharField(max_length = 200)
 	year_of_ug = models.IntegerField()
 
+class PhdDatasForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(PhdDatasForm, self).__init__(*args, **kwargs)
+		for field in self:
+			field.field.widget.attrs['class'] = 'form-control'
+	class Meta:
+		model = Phd_Datas
+		exclude = ['student']
 
 
 class Ug_Datas(models.Model):
@@ -143,6 +172,20 @@ class Ug_Datas(models.Model):
 	place_of_internship = models.CharField(max_length = 200)
 	ppo = models.CharField(max_length = 200)
 	spo_internship = models.CharField(max_length = 200)
+	def __str__(self):
+		return self.student.full_name
+
+
+
+class UgDatasForm(ModelForm):
+	def __init__(self, *args, **kwargs):
+		super(UgDatasForm, self).__init__(*args, **kwargs)
+		for field in self:
+			field.field.widget.attrs['class'] = 'form-control'
+	class Meta:
+		model = Ug_Datas
+		exclude = ['student']
+
 
 
 
@@ -267,4 +310,3 @@ class CompanyApplicationForm(ModelForm):
 		'email' : forms.EmailInput(attrs = {'class':'input-block','placeholder':'E-mail ID'}),
 		'phone' : forms.TextInput(attrs = {'class':'input-block','placeholder':'Phone number'}),
 		}
-	

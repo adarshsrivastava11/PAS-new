@@ -88,7 +88,7 @@ def signup(request):
         error = 'Username already exists'
       else:
         email_usr = username+'@iitk.ac.in'
-        user = User.objects.create_user(username = username, password = password,email=email_usr,first_name=firstname,is_active = False)
+        user = User.objects.create_user(username = username, password = password,email=email_usr,is_active = False)
         user.save()
         #send_mail('Your Pas Password', password , 'pasiitk16@gmail.com',
         #[username+'@iitk.ac.in'], fail_silently=True)
@@ -177,6 +177,62 @@ def student_profile(request,username):
     else:
       form = StudentForm(instance = student)
     return render(request,'profile.html',{'form':form,'username':username})
+
+
+@login_required(login_url = '/login/')
+@user_passes_test(student_check,login_url = '/login/')
+def student_data(request,username):
+  error = ''
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+    student = Student.objects.get(user = request.user)
+    if request.method == 'POST':
+      if student.program.value == 1:
+        inst = Ug_Datas(student = student)
+        form = UgDatasForm(request.POST,instance = inst)
+      elif student.program.value == 2:
+        inst = Pg_Datas(student = student)
+        form = PgDatasForm(request.POST,instance = inst)
+      elif student.program.value == 3:
+        inst = Dual_Datas(student = student)
+        form = DualDatasForm(request.POST,instance = inst)
+      elif student.program.value == 4:
+        inst = PhdDatasForm(student = student)
+        form = PhdDatasForm(request.POST,instance = inst)
+
+      if form.is_valid():
+        form.save()
+      else:
+        error = 'Form not valid'
+    else:
+      if student.program.value == 1:
+        if Ug_Datas.objects.filter(student = student).exists():
+          inst = Ug_Datas.objects.get(student = student)
+        else:
+          inst = Ug_Datas(student = student)
+        form = UgDatasForm(instance = inst)
+      elif student.program.value == 2:
+        if Pg_Datas.objects.filter(student = student).exists():
+          inst = Pg_Datas.objects.get(student = student)
+        else:
+          inst = Pg_Datas(student = student)
+        form = PgDatasForm(instance = inst)
+      elif student.program.value == 3:
+        if Dual_Datas.objects.filter(student = student).exists():
+          inst = Dual_Datas.objects.get(student = student)
+        else:
+          inst = Dual_Datas(student = student)
+        form = DualDatasForm(instance = inst)
+      elif student.program.value == 4:
+        if Phd_Datas.objects.filter(student = student).exists():
+          inst = Phd_Datas.objects.get(student = student)
+        else:
+          inst = Phd_Datas(student = student)
+        form = PhdDatasForm(instance = inst)
+    return render(request,'data.html',{'form':form,'username':username,'error':error})
+
+
 
 
 

@@ -137,11 +137,11 @@
                                 <hr>
                             </div>
                             <div class="content">
-                                <form action="/{{username}}/profile/" method="post">
+                                <form action="/{{username}}/data/" method="post">
 								    {% csrf_token %}
 								    {{form.non_field_errors}}
                                     {% for field in form %}
-                                    <div class = "row">                                       
+								    <div class = "row">
                                         <div class = "form-group">
                                             <div class = "col-md-4">
                                                 {{field.error}}
@@ -153,18 +153,10 @@
                                         </div>
                                     </div>
                                     {% endfor %}						 
-                                    <input type="submit" value="Update profile" class = "btn btn-fill btn-primary pull-right"/>
-                                    <div class = "clearfix"></div>
+								    <input type="submit" value="Save" class = "btn btn-primary btn-fill pull-right"/>
+                                    <div class = "clearfix"></div>			   
 								</form>
 								<p>{{error}}</p>
-                                <hr>
-                                <div class = "footer">
-                                    <div class = "col-md-offset-5">
-                                        <a href="/{{username}}/data" class = "btn btn-primary">
-                                            Next<span class = "glyphicon glyphicon-chevron-right"></span>
-                                        </a>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
