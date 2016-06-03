@@ -14,12 +14,19 @@ import time
 from datetime import datetime 
 from django.utils import timezone 
 import re
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.views.decorators.csrf import csrf_exempt
+
 
 def student_check(user):
   return Student.objects.filter(user = user).exists()
 
 def company_check(user):
   return Companies.objects.filter(user = user).exists()
+
+def poweruser_check(user):
+  return Poweruser.objects.filter(user = user).exists()
 
 
 def main_page(request):
@@ -45,7 +52,7 @@ def login_page(request):
         if user.is_active:
           login(request, user)
           
-          if Temp_Student.objects.filter(user = request.user).exists():
+          if Temp_Student.objects.filter(user = request.user,student_isAccepted=True).exists():
             return redirect('/' + username + '/fillform/')
 
           elif Student.objects.filter(user = request.user).exists():
@@ -53,6 +60,11 @@ def login_page(request):
 
           elif Companies.objects.filter(user = request.user).exists():
             return redirect('/' + username + '/homepage/')
+
+          elif Poweruser.objects.filter(user = request.user).exists():
+            return redirect('/' + username + '/panel/')
+            # /SPO/ used 
+
 
         else:
           error = 'Your account is not yet made active by SPO'
@@ -80,6 +92,9 @@ def signup(request):
 
     if form.is_valid():
       # username here is CC Username
+      firstname = form.cleaned_data['firstname']
+      lastname = form.cleaned_data['lastname']
+      student_name=firstname+" "+lastname
       username = form.cleaned_data['username_signup']
       roll_number = form.cleaned_data['roll_number']
       password = User.objects.make_random_password()
@@ -88,11 +103,10 @@ def signup(request):
         error = 'Username already exists'
       else:
         email_usr = username+'@iitk.ac.in'
-        user = User.objects.create_user(username = username, password = password,email=email_usr,is_active = False)
+        user = User.objects.create_user(username = username, password = password,email=email_usr,is_active = True)
         user.save()
-        #send_mail('Your Pas Password', password , 'pasiitk16@gmail.com',
-        #[username+'@iitk.ac.in'], fail_silently=True)
-        model = Temp_Student(user = user,student_name = password,student_roll = roll_number,student_username = username)
+        send_mail('Your Pas Password', password , 'pasiitk16@gmail.com',[username+'@iitk.ac.in'], fail_silently=True)
+        model = Temp_Student(user = user,student_name = student_name,student_roll = roll_number,student_username = username)
         model.save()
         return redirect('/signup_success/')           
   else:
@@ -335,41 +349,18 @@ def fillform(request,user_name):
       return render(request, 'register.html', {'form': form,'username': username})
 
 
-def poweruser(request): 
- data = request.POST.get('choice',False)
- query_res = Temp_Student.objects.filter(user__is_active = False)
- data_int  = int(data)
- if data_int != 0:
-  stu  = User.objects.get(id=data_int)
+#def poweruser(request): 
+# data = request.POST.get('choice',False)
+# query_res = Temp_Student.objects.filter(user__is_active = False)
+# data_int  = int(data)
+# if data_int != 0:
+#  stu  = User.objects.get(id=data_int)
 
-  stu.is_active = True
-  stu.save()
- return render(request, 'power_user.html', {'query_res':query_res})
 
-@login_required
-@permission_required('addy.add_news')
-@permission_required('addy.delete_news')
-def manage_news(request):
-  if request.method == 'POST':
-    news = News(time_date = timezone.now())
-    form = NewsForm(request.POST,instance = news)
-    if form.is_valid():
-      form.save()
-  else:
-    form = NewsForm()
-  # comapny_name=request.POST.get('company_name',False)
-  # data_news = request.POST.get('news_data',False)
-  # #news_author = request.POST.get('author',False)
-  # if comapny_name != False:
-   
-  #  new_news = News(company_name=comapny_name,news=data_news,time_date=timezone.now())
-  #  new_news.save()
-  # deletenews=request.POST.get('removeNews',False)
-  # deletenews = int(deletenews)
-  # if deletenews != 0:
-  #  News.objects.filter(id=deletenews).delete()
-  allnews = News.objects.all().order_by('-time_date')
-  return render(request,'news_manage.html',{'form':form,'allnews':allnews})
+#  stu.is_active = True
+#  stu.save()
+##return render(request, 'power_user.html', {'query_res':query_res})
+
 
 @login_required(login_url = '/login/')
 def resume_manage(request,user_name):
@@ -383,3 +374,274 @@ def resume_manage(request,user_name):
   })
   output = template.render(variables)
   return HttpResponse(output)
+
+
+@user_passes_test(poweruser_check,login_url = '/login/')
+#@permission_required('addy.view_Student')
+#@permission_required('addy.edit_Student')
+@csrf_exempt
+@login_required(login_url = '/login/')
+def panel(request,username):
+  
+  template = get_template('panel.html')
+  
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser = Poweruser.objects.get(user = request.user)
+      #username = request.user.username
+      email_user= request.user.email
+      lastlogin = request.user.last_login
+      
+      
+
+      # if News.objects.filter().exists():
+       # allnews = News.objects.all().order_by('-time_date')
+        #update_time = timezone.now()-News.objects.latest('time_date').time_date     
+      
+      #else:
+       # allnews = News.objects.none()
+        #update_time = timezone.now() - timezone.now()
+      
+
+      #if Companies.objects.filter().exists():
+       # allcompanies = Companies.objects.all().order_by('-name')
+      #else:
+       # allcompanies = Companies.objects.none()
+###
+      variables = {
+        
+        'lastlogin':lastlogin,
+        'username':username,
+        'email_user':email_user,
+      #  'allnews':allnews,
+       # 'update_time':update_time,
+        #'allcompanies':allcompanies,
+        }
+      
+     
+    return render(request, 'panel.html', variables)
+    #return HttpResponse(output)
+    #elif Companies.objects.filter(user = request.user).exists():
+    #  return redirect('/' + user_name + '/homepage/')
+
+#@permission_required('addy.view_Student')
+#@permission_required('addy.edit_Student')
+@user_passes_test(poweruser_check,login_url = '/login/')
+@login_required(login_url = '/login/')
+@csrf_exempt
+def activate_temp_student(request,username):
+  error=""
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser = Poweruser.objects.get(user = request.user)
+      email_user= request.user.email
+      lastlogin = request.user.last_login
+      
+      if Temp_Student.objects.filter(student_isAccepted = False).exists():
+        users=Temp_Student.objects.filter(student_isAccepted=False)
+        data = request.POST.get('choice',False)
+        data_int  = int(data)
+        if data_int != 0:
+          temp  = Temp_Student.objects.get(id=data_int)
+          temp.student_isAccepted = True
+          temp.save()
+          return redirect('/'+ username + '/panel/activate_temp_student')
+      else:
+        users = Temp_Student.objects.none()
+        error="All temp student accepted :)" 
+
+  variables = {
+    
+  'username':username,
+  'email_user':email_user,
+  'users':users,
+  'error':error,
+  }
+  return render(request, 'activate_temp_student.html', variables)
+  
+@user_passes_test(poweruser_check,login_url = '/login/')
+#@permission_required('addy.view_Student')
+#@permission_required('addy.edit_Student')
+@login_required(login_url = '/login/')
+@csrf_exempt
+def deactivate_temp_student(request,username):
+  
+  error=""
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser = Poweruser.objects.get(user = request.user)
+      email_user= request.user.email
+      lastlogin = request.user.last_login
+      
+      if Temp_Student.objects.filter(student_isAccepted = True).exists():
+        users=Temp_Student.objects.filter(student_isAccepted=True)
+        data = request.POST.get('choice',False)
+        data_int  = int(data)
+        if data_int != 0:
+          temp  = Temp_Student.objects.get(id=data_int)
+          temp.student_isAccepted = False
+          temp.save()
+          return redirect('/'+ username + '/panel/deactivate_temp_student')
+      else:
+        users = Temp_Student.objects.none()
+        error="All temp student rejected :(" 
+
+      
+  variables = {
+    
+  'username':username,
+  'email_user':email_user,
+  'users':users,
+  'error':error,
+  }
+  return render(request, 'deactivate_temp_student.html', variables)
+  
+
+@user_passes_test(poweruser_check,login_url = '/login/')
+#@permission_required('addy.view_Student')
+#@permission_required('addy.edit_Student')
+@csrf_exempt
+@login_required(login_url = '/login/')
+def add_news(request,username):
+  
+  error=""
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if request.method == 'POST':
+      form = NewsForm(request.POST)
+      if form.is_valid():
+        news = form.save(commit=False)
+        news.time_date=timezone.now()
+        news.save()
+        #news = News(time_date = timezone.now())
+      
+        return redirect('/'+ username + '/panel/add_news')
+      else:
+          error = form.errors
+    else:
+      form = NewsForm()
+
+  allnews = News.objects.all().order_by('-time_date')
+  return render(request,'add_news.html',{'username':username,'form':form,'allnews':allnews})
+
+
+@login_required(login_url = '/login/')
+@user_passes_test(poweruser_check,login_url = '/login/')
+#@permission_required('addy.view_News')
+#@permission_required('addy.edit_News')
+#@permission_required('addy.delete_News')
+def deletenews(request,username):
+  
+  if username != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser = Poweruser.objects.get(user = request.user)
+      email_user= request.user.email
+      lastlogin = request.user.last_login
+      
+      if News.objects.filter().exists():
+        users=News.objects.filter()
+        data = request.POST.get('choice',False)
+        data_int  = int(data)
+        if data_int != 0:
+          temp  = Temp_Student.objects.get(id=data_int)
+          temp.student_isAccepted = False
+          temp.save()
+          return redirect('/'+ username + '/panel/deactivate_temp_student')
+      else:
+        users = Temp_Student.objects.none()
+        error="All temp student rejected :(" 
+  
+      variables = {
+        
+        'user_name':username,
+        'email_user':email_user,
+        'allnews':allnews,
+        }
+     
+@login_required(login_url = '/login/')
+@user_passes_test(poweruser_check,login_url = '/login/')
+@permission_required('addy.view_Job_Openings')
+@permission_required('addy.edit_Job_Openings')
+def approve_job_notice(request,user_name):
+  
+  template = get_template('approve_job_notice.html')
+  
+  if user_name != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser1 = Poweruser.objects.get(user = request.user)
+      username = request.user.username
+      email_user= request.user.email
+      
+      alljobs=Job_Openings.objects.filter(published=False).order_by('-pub_date')
+
+
+      
+      variables = Context({
+        
+        'user_name':username,
+        'email_user':email_user,
+        'alljobs':alljobs,
+        })
+      output = template.render(variables)
+      return HttpResponse(output)
+    #elif Companies.objects.filter(user = request.user).exists():
+    #  return redirect('/' + user_name + '/homepage/')
+
+@login_required(login_url = '/login/')
+@user_passes_test(poweruser_check,login_url = '/login/')
+@permission_required('addy.view_Job_Openings')
+@permission_required('addy.edit_Job_Openings')
+def reject_job_notice(request,user_name):
+  
+  template = get_template('reject_job_notice.html')
+  
+  if user_name != request.user.username:
+    return redirect('/login/')
+  else:
+
+    if Poweruser.objects.filter(user = request.user).exists():
+      poweruser1 = Poweruser.objects.get(user = request.user)
+      username = request.user.username
+      email_user= request.user.email
+      
+      alljobs=Job_Openings.objects.filter(published=True).order_by('-company.name')
+
+
+      
+      variables = Context({
+        
+        'user_name':username,
+        'email_user':email_user,
+        'alljobs':alljobs,
+        })
+      output = template.render(variables)
+      return HttpResponse(output)
+    #elif Companies.objects.filter(user = request.user).exists():
+    #  return redirect('/' + user_name + '/homepage/')
+
+
+
+
+######################## POWER USER THINGS LEFT
+# Temp User
+# Company Add/Delete/Edit
+# Student Add/Delete/Edit
+# News Add
+# View Job Application

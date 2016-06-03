@@ -37,5 +37,5 @@ class ChangePassword(forms.Form):
 	oldpass = forms.CharField(label='Old Password:',max_length=20,widget=forms.TextInput(attrs={'type': 'password','class':'form-control','placeholder':'Old password'}))
 	newpass = forms.CharField(label='New Password:',max_length=20,widget=forms.TextInput(attrs={'type': 'password','class':'form-control','placeholder':'New password'}))
 
-class Poweruser(forms.Form):
-	test = forms.CharField(widget=forms.TextInput(attrs={'type':'submit','value':'4'}))
+#class Poweruser(forms.Form):
+#

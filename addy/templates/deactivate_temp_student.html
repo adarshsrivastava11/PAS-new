@@ -11,15 +11,14 @@
         <th>Response</th>
     </tr>
    
-<form action="/{{username}}/panel/" method="post">
-    {% csrf_token %}
-    {% for item in inactive_users %}
+<form action="/{{username}}/panel/deactivate_temp_student" method="post">
+    {% for item in users %}
     <tr>  
         <td>{{ item.student_name }}</td>
         <td>{{item.user_id}}</th>
         <td>{{ item.student_roll }}</td>
     
-     <td><button type="submit" name="choice" id="choice{{item.id}}" value="{{item.id}}" >Accept</button></td>
+     <td><button type="submit" name="choice" id="choice{{item.id}}" value="{{item.id}}" >Reject</button></td>
      </tr>
     {% endfor %}
 </table>

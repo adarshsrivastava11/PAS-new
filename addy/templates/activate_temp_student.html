@@ -11,9 +11,8 @@
         <th>Response</th>
     </tr>
    
-<form action="/{{username}}/panel/" method="post">
-    {% csrf_token %}
-    {% for item in inactive_users %}
+<form action="/{{username}}/panel/activate_temp_student" method="post">
+    {% for item in users %}
     <tr>  
         <td>{{ item.student_name }}</td>
         <td>{{item.user_id}}</th>

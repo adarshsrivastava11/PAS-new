@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .models import *
 
+admin.site.register(Poweruser)
 admin.site.register(Student)
 admin.site.register(Program)
 admin.site.register(Department)

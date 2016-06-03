@@ -28,6 +28,14 @@ class Department(models.Model):
 # An one-to-one relationship has been established between django default user and students model.
 # A foreign key of Program and Department model has been made to avoid unnecessary searches.
 
+class Deregistered (models.Model):
+	user = models.OneToOneField(User)
+	full_name=models.CharField(max_length=200)
+	spo_registration_number = models.IntegerField(default = 0)
+	roll_number = models.IntegerField()
+	def __str__(self):
+		return self.full_name
+
 
 class Student (models.Model):
 	MALE = 'Male'
@@ -197,6 +205,13 @@ class Companies(models.Model):
 	def __str__(self):
 		return self.name
 
+class Poweruser(models.Model):
+	user = models.OneToOneField(User)
+	name = models.CharField(max_length = 200)
+	email = models.CharField(max_length = 200)
+	def __str__(self):
+		return self.name
+
 
 class Job_Openings(models.Model):
 	company = models.ForeignKey(Companies, on_delete = models.CASCADE)
@@ -231,7 +246,7 @@ class Job_Openings(models.Model):
 	eligible_departments = models.ManyToManyField(Department)
 	eligiblity = models.CharField(max_length = 1024,default = 'none')
 	name = models.CharField(max_length = 200)
-	published = models.BooleanField()
+	published = models.BooleanField(default=False)
 	deadline = models.DateField()
 	ctc_btech = models.CharField(max_length = 200)
 	ctc_mtech = models.CharField(max_length = 200)
@@ -247,6 +262,7 @@ class Job_Openings(models.Model):
 	gd_strength = models.CharField(max_length = 200)
 	tech_interview_duration = models.CharField(max_length = 200)
 	hr_interview_duration = models.CharField(max_length = 200)
+	pub_date= models.DateTimeField('Date Published')
 	def __str__(self):
 		return self.name
 
@@ -257,7 +273,7 @@ class JobOpeningsForm(ModelForm):
 			field.field.widget.attrs['class'] = 'form-control'
 	class Meta:
 		model = Job_Openings
-		exclude = ['company']
+		exclude = ['company','published']
 		widgets = {
 		'eligible_departments':forms.CheckboxSelectMultiple(),
 		}
@@ -270,13 +286,12 @@ class Job_Application(models.Model):
 
 
 class News(models.Model):
-	job_opening = models.ForeignKey(Job_Openings,on_delete = models.CASCADE)
 	news = models.TextField()
-	subject = models.CharField(max_length=200)	
-	time_date = models.DateTimeField('Date Published')
+	subject = models.CharField(max_length=200)
+	time_date	 = models.DateTimeField('Date Published')
 
 	def __str__(self):
-		return self.job_opening.name
+		return self.subject
 
 class NewsForm(ModelForm):
 	class Meta:
@@ -290,7 +305,7 @@ class Temp_Student(models.Model):
 	student_name = models.CharField(max_length=200)
 	student_roll = models.IntegerField()
 	student_username = models.CharField(max_length=200)
-	student_isAccepted = models.IntegerField(default=0)
+	student_isAccepted = models.BooleanField(default=False)
 	def __str__(self):
 		return self.student_username
 
