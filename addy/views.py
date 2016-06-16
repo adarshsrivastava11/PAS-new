@@ -637,7 +637,20 @@ def reject_job_notice(request,user_name):
     #  return redirect('/' + user_name + '/homepage/')
 
 
-
+def generate_xls(request):
+  workbook = xlsxwriter.Workbook('addy/Job.xlsx')
+  worksheet = workbook.add_worksheet()
+  bold = workbook.add_format({'bold': 1})
+  row=1
+  col=0
+  worksheet.set_column(row, col, 15)
+  worksheet.write('A1', 'Student Name', bold)
+  jobs_applications = Job_Application.objects.all()
+  application_list = list(jobs_applications)
+  for jobs in application_list:
+    worksheet.write(row, 0,str(jobs.student))
+    row = row+1
+    
 
 ######################## POWER USER THINGS LEFT
 # Temp User
